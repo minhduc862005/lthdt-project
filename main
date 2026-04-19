@@ -1,0 +1,162 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <limits>
+#include "Contact.h"
+#include "ContactManager.h"
+#include "FileHandler.h"
+
+using namespace std;
+void showMenu() {
+    cout << "\n========== CONTACT MANAGER ==========\n";
+    cout << "1. Show all contacts\n";
+    cout << "2. Add contact\n";
+    cout << "3. Delete contact\n";
+    cout << "4. Update contact\n";
+    cout << "5. Search by name\n";
+    cout << "6. Save to file\n";
+    cout << "0. Exit\n";
+    cout << "Choose: ";
+}
+
+// Duyệt số điện thoại phải là số và có độ dài hợp lệ
+int inputInt() {
+    int x;
+    while (true) {
+        cin >> x;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input! Enter a number: ";
+        }
+        else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return x;
+        }
+    }
+}
+
+string inputString(const string& message) {
+    string s;
+    cout << message;
+    getline(cin, s);
+
+    while (s.empty()) {
+        cout << "Cannot be empty! Enter again: ";
+        getline(cin, s);
+    }
+    return s;
+}
+
+bool isValidPhone(const string& phone) {
+    if (phone.length() < 9 || phone.length() > 11) return false;
+    for (char c : phone) {
+        if (!isdigit(c)) return false;
+    }
+    return true;
+}
+
+int inputRelation() {
+    int rel;
+    while (true) {
+        cout << "Relation (0-FAMILY, 1-FRIEND, 2-TEACHER, 3-COLLEAGUE): ";
+        rel = inputInt();
+        if (rel >= 0 && rel <= 3) return rel;
+        cout << "Invalid relation! Try again.\n";
+    }
+}
+
+// INPUT CONTACT 
+Contact inputContact() {
+    string name = inputString("Enter name: ");
+
+    string phone;
+    while (true) {
+        phone = inputString("Enter phone: ");
+        if (isValidPhone(phone)) break;
+        cout << "Invalid phone! Only digits (9-11 chars).\n";
+    }
+
+    int rel = inputRelation();
+    return Contact(name, phone, (Relationship)rel);
+}
+
+//MAIN
+int main() {
+    ContactManager manager;
+
+    // Load dữ liệu
+    vector<Contact> data = FileHandler::loadFromFile("data.txt");
+    manager.setContacts(data);
+
+    int choice;
+
+    do {
+        showMenu();
+        choice = inputInt();
+
+        switch (choice) {
+        case 1:
+            clearScreen();
+            manager.displayAll();
+            break;
+
+        case 2: {
+            clearScreen();
+            Contact c = inputContact();
+            manager.addContact(c);
+            cout << "Added successfully!\n";
+            break;
+        }
+
+        case 3: {
+            clearScreen();
+            string phone = inputString("Enter phone to delete: ");
+            manager.deleteContact(phone);
+            cout << "Deleted (if existed).\n";
+            break;
+        }
+
+        case 4: {
+            clearScreen();
+            string phone = inputString("Enter phone to update: ");
+            Contact newC = inputContact();
+            manager.updateContact(phone, newC);
+            cout << "Updated (if existed).\n";
+            break;
+        }
+
+        case 5: {
+            clearScreen();
+            string name = inputString("Enter name to search: ");
+            vector<Contact> result = manager.searchByName(name);
+
+            if (result.empty()) {
+                cout << "No contacts found.\n";
+            }
+            else {
+                for (const auto& c : result) {
+                    c.display();
+                }
+            }
+            break;
+        }
+
+        case 6:
+            FileHandler::saveToFile("data.txt", manager.getAll());
+            cout << "Saved successfully!\n";
+            break;
+
+        case 0:
+            FileHandler::saveToFile("data.txt", manager.getAll());
+            cout << "Exiting program...\n";
+            break;
+
+        default:
+            cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
