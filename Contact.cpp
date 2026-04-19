@@ -1,39 +1,13 @@
 #include "Contact.h"
 
 // Constructor
-Contact::Contact(string name, string phone, Relationship relation) {
-    this->name = name;
-    this->phone = phone;
-    this->relation = relation;
+Contact::Contact(string n, string p, Relationship r) {
+    name = n;
+    phone = p;
+    relation = r;
 }
 
-// Getter
-string Contact::getName() {
-    return name;
-}
-
-string Contact::getPhone() {
-    return phone;
-}
-
-Relationship Contact::getRelation() {
-    return relation;
-}
-
-// Setter
-void Contact::setName(string name) {
-    this->name = name;
-}
-
-void Contact::setPhone(string phone) {
-    this->phone = phone;
-}
-
-void Contact::setRelation(Relationship relation) {
-    this->relation = relation;
-}
-
-// Convert enum -> string
+// Hàm chuyển enum → string
 string relationToString(Relationship r) {
     switch (r) {
         case FAMILY: return "FAMILY";
@@ -44,7 +18,7 @@ string relationToString(Relationship r) {
     return "UNKNOWN";
 }
 
-// Display
+// Hiển thị
 void Contact::display() {
     cout << "Name: " << name
          << " | Phone: " << phone
